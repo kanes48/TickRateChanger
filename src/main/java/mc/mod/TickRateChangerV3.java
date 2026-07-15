@@ -1,26 +1,58 @@
-package mc.mod;
+package mc.mod.mixin;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import mc.mod.TickRateManager;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public class TickRateChangerV3 implements ModInitializer {
+import java.util.function.BooleanSupplier;
 
-	public static final String MOD_ID = "tickratechangerv3";
+import static mc.mod.TickRateChangerV3.LOGGER;
 
-	public static final Logger LOGGER =
-			LogManager.getLogger(MOD_ID);
+@Mixin(MinecraftServer.class)
+public abstract class TickRateMixin {
+
+	@Shadow
+	private long nextTickTime;
+
+	@Shadow
+	private boolean running;
+
+	/**
+	 * Replace the vanilla 50ms tick length with a configurable one.
+	 */
+	@ModifyConstant(
+			method = "runServer",
+			constant = @Constant(longValue = 50L)
+	)
+	private long modifyTickLength(long original) {
+		return Math.max(1L, 1000L / TickRateManager.getTPS());
+	}
+
+	private static long lastTick = System.nanoTime();
+	private static long lastPrint = lastTick;
+	private static int ticks = 0;
+
+	@Inject(method = "tickServer", at = @At("HEAD"))
+	private void logTPS(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		ticks++;
+
+		long now = System.nanoTime();
+
+		if (now - lastPrint >= 1_000_000_000L) {
+			double seconds = (now - lastPrint) / 1_000_000_000.0;
+			double tps = ticks / seconds;
 
 
-	@Override
-	public void onInitialize() {
+			ticks = 0;
+			lastPrint = now;
+		}
 
-		LOGGER.info("TickRateChangerV3 loaded!");
-
-		CommandRegistrationCallback.EVENT.register(
-				(dispatcher, dedicated) ->
-						TickRateCommand.register(dispatcher)
-		);
+		lastTick = now;
 	}
 }

@@ -34,26 +34,4 @@ public abstract class TickRateMixin {
 		return Math.max(1L, 1000L / TickRateManager.getTPS());
 	}
 
-	private static long lastTick = System.nanoTime();
-	private static long lastPrint = lastTick;
-	private static int ticks = 0;
-
-	@Inject(method = "tickServer", at = @At("HEAD"))
-	private void logTPS(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-		ticks++;
-
-		long now = System.nanoTime();
-
-		if (now - lastPrint >= 1_000_000_000L) {
-			double seconds = (now - lastPrint) / 1_000_000_000.0;
-			double tps = ticks / seconds;
-
-			LOGGER.info("Current TPS: {}", String.format("%.1f", tps));
-
-			ticks = 0;
-			lastPrint = now;
-		}
-
-		lastTick = now;
-	}
 }
