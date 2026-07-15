@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "mc.mod.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"TickRateMixin",
+		"BlockableEventLoopMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

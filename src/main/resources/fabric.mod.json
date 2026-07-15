@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "tickratechangerv3",
+	"version": "${version}",
+	"name": "TickRateChangerV3",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/tickratechangerv3/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"mc.mod.TickRateChangerV3"
+		]
+	},
+	"mixins": [
+		"tickratechangerv3.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.16.1",
+		"java": ">=8",
+		"fabric": "*"
+	}
+}
